@@ -37,6 +37,7 @@ wss.on('connection', (ws) => {
       // 1. Enregistrement de l'utilisateur
       if (message.type === 'register') {
         currentUserId = message.userId;
+        ws.userId = message.userId;
         if (currentUserId) {
           clients.set(currentUserId, ws);
           console.log(`[Connecté] Utilisateur enregistré : ${currentUserId}`);
@@ -88,7 +89,7 @@ wss.on('connection', (ws) => {
       type: message.type,
       messageId: message.messageId,
       targetId: message.targetId,
-      by: ws.userId
+      by: ws.userId || currentUserId
     }));
     console.log(`[Relai ACK ${message.type}] De ${ws.userId} vers ${message.targetId}`);
   }
