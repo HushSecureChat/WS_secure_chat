@@ -70,7 +70,17 @@ wss.on('connection', (ws) => {
           }));
         }
       }
-
+      // Quand l'utilisateur ouvre une conv ou affiche un message
+      else if (message.type === 'ack_delivered' || message.type === 'ack_read') {
+        const targetSocket = clients.get(message.targetId);
+        if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+          targetSocket.send(JSON.stringify({
+            type: message.type,
+            messageId: message.messageId, // ou messageIds (array)
+            by: ws.userId
+          }));
+        }
+      }
       // 3. Demande de statut en ligne d'un contact
       else if (message.type === 'check_status') {
         const { targetId } = message;
