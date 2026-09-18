@@ -82,7 +82,6 @@ wss.on('connection', (ws) => {
 
       // 3. Accusés de réception (lu / distribué)
       else if (message.type === 'ack_delivered' || message.type === 'ack_read') {
-      else if (message.type === 'ack_delivered' || message.type === 'ack_read') {
   const targetSocket = clients.get(message.targetId);
   if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
     targetSocket.send(JSON.stringify({
