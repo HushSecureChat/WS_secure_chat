@@ -82,15 +82,18 @@ wss.on('connection', (ws) => {
 
       // 3. Accusés de réception (lu / distribué)
       else if (message.type === 'ack_delivered' || message.type === 'ack_read') {
-        const targetSocket = clients.get(message.targetId);
-        if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
-          targetSocket.send(JSON.stringify({
-            type: message.type,
-            messageId: message.messageId,
-            by: ws.userId
-          }));
-        }
-      }
+      else if (message.type === 'ack_delivered' || message.type === 'ack_read') {
+  const targetSocket = clients.get(message.targetId);
+  if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+    targetSocket.send(JSON.stringify({
+      type: message.type,
+      messageId: message.messageId,
+      targetId: message.targetId,
+      by: ws.userId
+    }));
+    console.log(`[Relai ACK ${message.type}] De ${ws.userId} vers ${message.targetId}`);
+  }
+}
 
       // 4. Demande de statut en ligne
       else if (message.type === 'check_status') {
