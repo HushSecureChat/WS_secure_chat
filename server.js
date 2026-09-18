@@ -1,14 +1,37 @@
 import { WebSocketServer, WebSocket } from 'ws';
+import http from 'http';
+import fs from 'fs';
+
+const server = http.createServer((req, res) => {
+  if (req.url === '/version.json') {
+    try {
+      // 2. C'est cette ligne qui va chercher ton fichier version.json sur le disque du serveur
+      const versionData = fs.readFileSync('./version.json', 'utf8');
+      
+      res.writeHead(200, { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(versionData); // 3. Et c'est ça qui renvoie le contenu exact du fichier
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.end('Erreur de lecture du fichier version.json');
+    }
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Hush Relay Server is active.');
+  }
+});
+
+// 2. Attacher le serveur WebSocket sur le même serveur HTTP
+const wss = new WebSocketServer({ server });
 
 // Utiliser le port attribué par Render ou 8080 par défaut en local
 const PORT = process.env.PORT || 8080;
-const wss = new WebSocketServer({ port: PORT });
 
 // Maps pour stocker les clients connectés et les messages en attente
 const clients = new Map();
 const offlineMessages = new Map();
-
-console.log(`Serveur de relais WebSocket démarré sur le port ${PORT}`);
 
 wss.on('connection', (ws) => {
   let currentUserId = null;
@@ -104,4 +127,9 @@ wss.on('connection', (ws) => {
       console.log(`[Déconnecté] Utilisateur retiré : ${currentUserId}`);
     }
   });
+});
+
+// 3. Lancer le serveur sur le port Render
+server.listen(PORT, () => {
+  console.log(`Serveur Hush démarré (WebSocket + API Version) sur le port ${PORT}`);
 });
