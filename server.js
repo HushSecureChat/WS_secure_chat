@@ -115,6 +115,16 @@ wss.on('connection', (ws) => {
           isOnline: isOnline
         }));
       }
+      // Côté server.js
+      else if (message.type === 'ack_delivered' || message.type === 'ack_read') {
+        const targetSocket = clients.get(message.targetId);
+        if (targetSocket && targetSocket.readyState === WebSocket.OPEN) {
+          targetSocket.send(JSON.stringify({
+            type: message.type,
+            messageId: message.messageId, // 👈 Doit correspondre
+          }));
+        }
+      }
 
     } catch (e) {
       console.error('Erreur lors du traitement du message JSON :', e);
